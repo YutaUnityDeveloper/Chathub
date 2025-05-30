@@ -1,0 +1,2107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatHub - Real-Time Chat Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #36393f;
+            color: #dcddde;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-card {
+            background: #36393f;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.24);
+            width: 400px;
+        }
+
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #b9bbbe;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background: #40444b;
+            border: 1px solid #202225;
+            border-radius: 3px;
+            color: #dcddde;
+            font-size: 16px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #7289da;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #7289da;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #677bc4;
+        }
+
+        .toggle-auth {
+            text-align: center;
+            margin-top: 20px;
+            color: #7289da;
+            cursor: pointer;
+        }
+
+        /* Main App */
+        .app {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .app-header {
+            background: #202225;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            border-bottom: 1px solid #40444b;
+        }
+
+        .server-name {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #7289da;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 3px;
+        }
+
+        .settings-btn:hover {
+            background: #40444b;
+        }
+
+        .app-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .servers-bar {
+            width: 72px;
+            background: #202225;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 0;
+            gap: 8px;
+        }
+
+        .server-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 24px;
+            background: #36393f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #dcddde;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .server-icon:hover {
+            border-radius: 16px;
+            background: #7289da;
+        }
+
+        .server-icon.active {
+            border-radius: 16px;
+            background: #7289da;
+        }
+
+        .server-icon.active::before {
+            content: '';
+            position: absolute;
+            left: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 40px;
+            background: #fff;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .add-server {
+            background: #43b581;
+            color: white;
+        }
+
+        .add-server:hover {
+            background: #3ca374;
+            border-radius: 16px;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: #2f3136;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .server-header {
+            height: 48px;
+            background: #36393f;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            cursor: pointer;
+        }
+
+        .server-header:hover {
+            background: #3c3f44;
+        }
+
+        .server-dropdown {
+            font-size: 18px;
+            color: #b9bbbe;
+        }
+
+        .channel-list {
+            flex: 1;
+            padding: 16px 8px;
+        }
+
+        .channel-category {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8e9297;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .channel {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            margin: 1px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #8e9297;
+        }
+
+        .channel:hover, .channel.active {
+            background: #393c43;
+            color: #dcddde;
+        }
+
+        .channel-icon {
+            margin-right: 8px;
+            font-size: 20px;
+        }
+
+        .user-panel {
+            background: #292b2f;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            height: 48px;
+            background: #36393f;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 16px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #7289da;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin-right: 16px;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .message-author {
+            font-weight: 500;
+            color: #fff;
+            margin-right: 8px;
+        }
+
+        .message-timestamp {
+            font-size: 12px;
+            color: #72767d;
+        }
+
+        .message-text {
+            color: #dcddde;
+            line-height: 1.375;
+        }
+
+        .chat-input-container {
+            padding: 16px;
+            background: #36393f;
+        }
+
+        .chat-input {
+            width: 100%;
+            background: #40444b;
+            border: 1px solid #202225;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #dcddde;
+            font-size: 14px;
+            resize: none;
+            min-height: 44px;
+            max-height: 144px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #7289da;
+        }
+
+        .online-users {
+            width: 240px;
+            background: #2f3136;
+            padding: 16px 8px;
+            border-left: 1px solid #40444b;
+        }
+
+        .online-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8e9297;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .online-user {
+            display: flex;
+            align-items: center;
+            padding: 2px 8px;
+            margin: 1px 0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .online-user:hover {
+            background: #393c43;
+        }
+
+        .online-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #7289da;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin-right: 8px;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .status-indicator {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #43b581;
+            border: 2px solid #2f3136;
+        }
+
+        .online-user-name {
+            color: #dcddde;
+            font-size: 14px;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #36393f;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #40444b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .close-btn:hover {
+            background: #40444b;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .profile-section {
+            margin-bottom: 20px;
+        }
+
+        .profile-section h3 {
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .profile-banner {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .profile-banner:hover::after {
+            content: '📷 Change Banner';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .profile-avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #7289da;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 32px;
+            margin-bottom: 16px;
+            position: relative;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .profile-avatar-large:hover::after {
+            content: '📷';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .badge {
+            background: #5865f2;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge.vip { background: #f1c40f; color: #000; }
+        .badge.first500 { background: #e74c3c; }
+        .badge.beta { background: #9b59b6; }
+        .badge.contributor { background: #1abc9c; }
+        .badge.supporter { background: #e67e22; }
+        .badge.owner { background: #f04747; }
+        .badge.verified { background: #43b581; }
+
+        /* Admin Panel */
+        .admin-controls {
+            background: #f04747;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .admin-title {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .admin-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .admin-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .badge-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .badge-option {
+            background: #40444b;
+            border: 1px solid #72767d;
+            color: #dcddde;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .badge-option:hover {
+            background: #5865f2;
+            color: white;
+        }
+
+        .settings-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #40444b;
+        }
+
+        .setting-label {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .setting-description {
+            color: #b9bbbe;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #72767d;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toggle-switch.active {
+            background: #43b581;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(20px);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-area {
+            border: 2px dashed #72767d;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: #7289da;
+        }
+
+        .upload-text {
+            color: #b9bbbe;
+            font-size: 14px;
+        }
+
+        .bio-input {
+            width: 100%;
+            background: #40444b;
+            border: 1px solid #202225;
+            border-radius: 4px;
+            color: #dcddde;
+            padding: 8px 12px;
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .bio-input:focus {
+            outline: none;
+            border-color: #7289da;
+        }
+
+        .role-manager {
+            background: #40444b;
+            border-radius: 8px;
+            margin: 16px 0;
+            padding: 16px;
+        }
+
+        .role-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+
+        .role-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 4px 0;
+            background: #36393f;
+        }
+
+        .role-name {
+            font-weight: 500;
+            color: #dcddde;
+        }
+
+        .role-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .role-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .role-btn {
+            background: #5865f2;
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .role-btn.danger {
+            background: #f04747;
+        }
+
+        .role-btn:hover {
+            opacity: 0.8;
+        }
+
+        .create-role {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .role-input {
+            flex: 1;
+            background: #202225;
+            border: 1px solid #40444b;
+            color: #dcddde;
+            padding: 6px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .color-picker {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            background: none;
+            cursor: pointer;
+        }
+
+        .permissions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .permission-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #36393f;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .permission-label {
+            font-size: 12px;
+            color: #b9bbbe;
+        }
+
+        .member-management {
+            background: #40444b;
+            border-radius: 8px;
+            margin: 16px 0;
+            padding: 16px;
+        }
+
+        .member-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 8px;
+            border-radius: 4px;
+            margin: 2px 0;
+        }
+
+        .member-item:hover {
+            background: #36393f;
+        }
+
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .member-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #7289da;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            background-size: cover;
+        }
+
+        .invite-section {
+            background: #40444b;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .invite-code {
+            background: #202225;
+            border: 1px solid #40444b;
+            color: #dcddde;
+            padding: 8px 12px;
+            border-radius: 4px;
+            width: 100%;
+            font-family: monospace;
+            margin: 8px 0;
+        }
+
+        .server-settings-tabs {
+            display: flex;
+            border-bottom: 1px solid #40444b;
+            margin-bottom: 16px;
+        }
+
+        .settings-tab {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .settings-tab.active {
+            color: #7289da;
+            border-bottom-color: #7289da;
+        }
+
+        .settings-tab:hover {
+            color: #dcddde;
+        }
+
+        .channel-manager {
+            background: #40444b;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .channel-category-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #36393f;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+
+        .category-channels {
+            margin-left: 16px;
+            border-left: 2px solid #40444b;
+            padding-left: 8px;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin: 2px 0;
+            background: #2f3136;
+        }
+
+        .create-channel {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .channel-type-select {
+            background: #202225;
+            border: 1px solid #40444b;
+            color: #dcddde;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        @media (max-width: 768px) {
+            .online-users {
+                display: none;
+            }
+            
+            .sidebar {
+                width: 200px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <h2 id="authTitle">Welcome to ChatHub</h2>
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required maxlength="32">
+                </div>
+                <div class="form-group" id="emailGroup" style="display: none;">
+                    <label for="email">Email</label>
+                    <input type="email" id="email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required minlength="6">
+                </div>
+                <button type="submit" class="btn" id="authBtn">Login</button>
+            </form>
+            <div class="toggle-auth" id="toggleAuth">Need an account? Register</div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app" id="app">
+        <div class="app-header">
+            <div class="server-name">Main Server</div>
+            <div class="user-area">
+                <div class="user-avatar" id="headerAvatar" onclick="openProfile()">U</div>
+                <button class="settings-btn" onclick="openSettings()">⚙️</button>
+                <button class="settings-btn" onclick="logout()">🚪</button>
+            </div>
+        </div>
+
+        <div class="app-body">
+            <div class="servers-bar">
+                <div class="server-icon active" data-server="main" onclick="switchServer('main')">M</div>
+                <div class="server-icon add-server" onclick="openCreateServer()">+</div>
+                <div id="customServersList"></div>
+            </div>
+
+            <div class="sidebar">
+                <div class="server-header" onclick="openServerSettings()">
+                    <div>
+                        <div style="font-weight: 600; color: #fff;" id="currentServerName">Main Server</div>
+                    </div>
+                    <div class="server-dropdown">⌄</div>
+                </div>
+                
+                <div class="channel-list">
+                    <div id="channelsList">
+                        <div class="channel-category">Text Channels</div>
+                        <div class="channel active" data-channel="general" onclick="switchChannel('general')">
+                            <span class="channel-icon">#</span>
+                            <span>general</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-panel">
+                    <div style="display: flex; align-items: center;">
+                        <div class="user-avatar" id="sidebarAvatar">U</div>
+                        <div style="margin-left: 8px;">
+                            <div style="font-size: 14px; font-weight: 500;" id="sidebarUsername">Username</div>
+                            <div style="font-size: 12px; color: #43b581;">Online</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="chat-header">
+                    <span class="channel-icon" style="margin-right: 8px;">#</span>
+                    <span>general</span>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message">
+                        <div class="message-avatar">S</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">System</span>
+                                <span class="message-timestamp">Today at 12:00 PM</span>
+                            </div>
+                            <div class="message-text">Welcome to ChatHub! Create an account to start chatting with real users.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <textarea class="chat-input" placeholder="Message #general" id="messageInput" onkeydown="handleMessageInput(event)"></textarea>
+                </div>
+            </div>
+
+            <div class="online-users">
+                <div class="online-title">Online — <span id="onlineCount">0</span></div>
+                <div id="onlineUsersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">User Profile</div>
+                <button class="close-btn" onclick="closeModal('profileModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-section">
+                    <div class="profile-banner" id="profileBanner" onclick="changeBanner()"></div>
+                    <div class="profile-avatar-large" id="profileAvatar" onclick="changeAvatar()">U</div>
+                    <h3 id="profileUsername">Username</h3>
+                    <p style="color: #b9bbbe; margin-bottom: 8px;" id="profileStatus">Online</p>
+                    <div class="badges" id="profileBadges"></div>
+                </div>
+
+                <div id="adminPanel" style="display: none;">
+                    <div class="admin-controls">
+                        <div class="admin-title">🛡️ Owner Controls</div>
+                        <div class="admin-actions">
+                            <button class="admin-btn" onclick="viewAllData()">View All Data</button>
+                            <button class="admin-btn" onclick="clearMessages()">Clear Messages</button>
+                            <button class="admin-btn" onclick="kickUser()">Kick User</button>
+                        </div>
+                        <div style="margin-top: 16px;">
+                            <label style="color: white; font-weight: 500; display: block; margin-bottom: 8px;">Add Badge:</label>
+                            <div class="badge-selector">
+                                <div class="badge-option" onclick="addBadge('vip')">VIP</div>
+                                <div class="badge-option" onclick="addBadge('first500')">First 500</div>
+                                <div class="badge-option" onclick="addBadge('beta')">Beta Tester</div>
+                                <div class="badge-option" onclick="addBadge('contributor')">Contributor</div>
+                                <div class="badge-option" onclick="addBadge('supporter')">Supporter</div>
+                                <div class="badge-option" onclick="addBadge('verified')">Verified</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <h3>Profile Customization</h3>
+                    <div class="form-group">
+                        <label for="editBio">About Me</label>
+                        <textarea id="editBio" class="bio-input" placeholder="Tell others about yourself..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editUsername">Username</label>
+                        <input type="text" id="editUsername" class="form-group input" maxlength="32">
+                    </div>
+                    <div class="form-group">
+                        <label for="editEmail">Email</label>
+                        <input type="email" id="editEmail" class="form-group input">
+                    </div>
+                    <button class="btn" onclick="updateProfile()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Server Modal -->
+    <div class="modal" id="createServerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Create Your Server</div>
+                <button class="close-btn" onclick="closeModal('createServerModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-section">
+                    <h3>Server Details</h3>
+                    <div class="form-group">
+                        <label for="serverName">Server Name</label>
+                        <input type="text" id="serverName" class="form-group input" placeholder="My Awesome Server" maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="serverDescription">Server Description</label>
+                        <textarea id="serverDescription" class="bio-input" placeholder="Describe your server..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Server Icon</label>
+                        <div class="upload-area" onclick="document.getElementById('serverIconInput').click()">
+                            <div class="upload-text">Click to upload server icon</div>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="createServer()">Create Server</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Server Settings Modal -->
+    <div class="modal" id="serverSettingsModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <div class="modal-title">Server Settings</div>
+                <button class="close-btn" onclick="closeModal('serverSettingsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="server-settings-tabs">
+                    <button class="settings-tab active" onclick="switchSettingsTab('overview')">Overview</button>
+                    <button class="settings-tab" onclick="switchSettingsTab('channels')">Channels</button>
+                    <button class="settings-tab" onclick="switchSettingsTab('roles')">Roles</button>
+                    <button class="settings-tab" onclick="switchSettingsTab('members')">Members</button>
+                    <button class="settings-tab" onclick="switchSettingsTab('invites')">Invites</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div id="overviewTab" class="settings-tab-content">
+                    <div class="profile-section">
+                        <h3>Server Overview</h3>
+                        <div class="form-group">
+                            <label for="editServerName">Server Name</label>
+                            <input type="text" id="editServerName" class="form-group input">
+                        </div>
+                        <div class="form-group">
+                            <label for="editServerDescription">Description</label>
+                            <textarea id="editServerDescription" class="bio-input"></textarea>
+                        </div>
+                        <button class="btn" onclick="updateServerSettings()">Save Changes</button>
+                        <button class="btn" style="background: #f04747; margin-top: 8px;" onclick="deleteServer()">Delete Server</button>
+                    </div>
+                </div>
+
+                <!-- Channels Tab -->
+                <div id="channelsTab" class="settings-tab-content" style="display: none;">
+                    <div class="channel-manager">
+                        <h3 style="color: #fff; margin-bottom: 16px;">Channel Management</h3>
+                        <div id="channelManagerList"></div>
+                        <div class="create-channel">
+                            <input type="text" class="role-input" id="newChannelName" placeholder="Channel name">
+                            <select class="channel-type-select" id="channelType">
+                                <option value="text">Text Channel</option>
+                                <option value="voice">Voice Channel</option>
+                                <option value="category">Category</option>
+                            </select>
+                            <button class="role-btn" onclick="createChannel()">Create</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roles Tab -->
+                <div id="rolesTab" class="settings-tab-content" style="display: none;">
+                    <div class="role-manager">
+                        <h3 style="color: #fff; margin-bottom: 16px;">Role Management</h3>
+                        <div class="role-list" id="rolesList"></div>
+                        <div class="create-role">
+                            <input type="text" class="role-input" id="newRoleName" placeholder="Role name">
+                            <input type="color" class="color-picker" id="roleColor" value="#7289da">
+                            <button class="role-btn" onclick="createRole()">Create Role</button>
+                        </div>
+                        <div class="permissions-grid" id="permissionsGrid" style="display: none;">
+                            <h4 style="grid-column: 1/-1; color: #fff; margin: 16px 0 8px 0;">Role Permissions</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Members Tab -->
+                <div id="membersTab" class="settings-tab-content" style="display: none;">
+                    <div class="member-management">
+                        <h3 style="color: #fff; margin-bottom: 16px;">Server Members</h3>
+                        <div class="member-list" id="serverMembersList"></div>
+                    </div>
+                </div>
+
+                <!-- Invites Tab -->
+                <div id="invitesTab" class="settings-tab-content" style="display: none;">
+                    <div class="invite-section">
+                        <h3 style="color: #fff; margin-bottom: 16px;">Server Invites</h3>
+                        <p style="color: #b9bbbe; margin-bottom: 12px;">Share this invite link to let people join your server:</p>
+                        <input type="text" class="invite-code" id="serverInviteCode" readonly>
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <button class="role-btn" onclick="copyInviteCode()">Copy Link</button>
+                            <button class="role-btn" onclick="generateNewInvite()">Generate New</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Settings</div>
+                <button class="close-btn" onclick="closeModal('settingsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Dark Theme</div>
+                            <div class="setting-description">Use dark theme for better night viewing</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Sound Notifications</div>
+                            <div class="setting-description">Play sound when receiving messages</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Show Online Status</div>
+                            <div class="setting-description">Let others see when you're online</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Auto-scroll Chat</div>
+                            <div class="setting-description">Automatically scroll to new messages</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file inputs -->
+    <input type="file" id="avatarInput" class="file-input" accept="image/*" onchange="handleAvatarUpload(event)">
+    <input type="file" id="bannerInput" class="file-input" accept="image/*" onchange="handleBannerUpload(event)">
+    <input type="file" id="serverIconInput" class="file-input" accept="image/*" onchange="handleServerIconUpload(event)">
+
+    <script>
+        // Global state - Real user system with servers
+        let currentUser = null;
+        let isOwner = false;
+        let messages = [];
+        let users = {};
+        let servers = {};
+        let currentServer = 'main';
+        let currentChannel = 'general';
+        let selectedUser = null;
+        let selectedRole = null;
+        let userCount = 0;
+        let settings = {
+            darkTheme: true,
+            soundNotifications: true,
+            showOnlineStatus: true,
+            autoScrollChat: true
+        };
+
+        // Load data from localStorage
+        function loadUserData() {
+            const savedUsers = localStorage.getItem('chathub_users');
+            const savedMessages = localStorage.getItem('chathub_messages');
+            const savedServers = localStorage.getItem('chathub_servers');
+            const savedUserCount = localStorage.getItem('chathub_usercount');
+            
+            if (savedUsers) {
+                users = JSON.parse(savedUsers);
+            }
+            if (savedMessages) {
+                messages = JSON.parse(savedMessages);
+            }
+            if (savedServers) {
+                servers = JSON.parse(savedServers);
+            } else {
+                // Initialize default main server
+                servers = {
+                    'main': {
+                        id: 'main',
+                        name: 'Main Server',
+                        description: 'The default server for all users',
+                        icon: null,
+                        owner: 'System',
+                        members: [],
+                        channels: {
+                            'general': {
+                                id: 'general',
+                                name: 'general',
+                                type: 'text',
+                                category: null,
+                                messages: []
+                            }
+                        },
+                        roles: {
+                            'everyone': {
+                                id: 'everyone',
+                                name: '@everyone',
+                                color: '#99aab5',
+                                permissions: ['READ_MESSAGES', 'SEND_MESSAGES'],
+                                position: 0
+                            }
+                        },
+                        inviteCode: 'MAIN001'
+                    }
+                };
+            }
+            if (savedUserCount) {
+                userCount = parseInt(savedUserCount);
+            }
+        }
+
+        // Save data to localStorage
+        function saveUserData() {
+            localStorage.setItem('chathub_users', JSON.stringify(users));
+            localStorage.setItem('chathub_messages', JSON.stringify(messages));
+            localStorage.setItem('chathub_servers', JSON.stringify(servers));
+            localStorage.setItem('chathub_usercount', userCount.toString());
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            
+            // Restore messages
+            if (messages.length > 0) {
+                const messagesContainer = document.getElementById('chatMessages');
+                messagesContainer.innerHTML = '';
+                messages.forEach(msg => {
+                    displayMessage(msg.author, msg.text, new Date(msg.timestamp), msg.avatar);
+                });
+            }
+            
+            updateOnlineUsers();
+        });
+
+        // Auth functions
+        let isLoginMode = true;
+
+        document.getElementById('toggleAuth').addEventListener('click', function() {
+            isLoginMode = !isLoginMode;
+            const title = document.getElementById('authTitle');
+            const btn = document.getElementById('authBtn');
+            const toggle = document.getElementById('toggleAuth');
+            const emailGroup = document.getElementById('emailGroup');
+            
+            if (isLoginMode) {
+                title.textContent = 'Welcome Back';
+                btn.textContent = 'Login';
+                toggle.textContent = 'Need an account? Register';
+                emailGroup.style.display = 'none';
+            } else {
+                title.textContent = 'Create Account';
+                btn.textContent = 'Register';
+                toggle.textContent = 'Already have an account? Login';
+                emailGroup.style.display = 'block';
+            }
+        });
+
+        document.getElementById('authForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+
+            if (isLoginMode) {
+                login(username, password);
+            } else {
+                register(username, email, password);
+            }
+        });
+
+        function login(username, password) {
+            if (users[username] && users[username].password === password) {
+                currentUser = users[username];
+                currentUser.online = true;
+                currentUser.lastSeen = new Date();
+                saveUserData();
+                startApp();
+            } else {
+                alert('Invalid username or password');
+            }
+        }
+
+        function register(username, email, password) {
+            if (!username || !password) {
+                alert('Username and password are required');
+                return;
+            }
+
+            if (users[username]) {
+                alert('Username already exists');
+                return;
+            }
+
+            userCount++;
+            currentUser = { 
+                username, 
+                email, 
+                password,
+                bio: '',
+                avatar: null,
+                banner: null,
+                badges: userCount <= 500 ? ['first500'] : [],
+                online: true,
+                lastSeen: new Date(),
+                joinDate: new Date(),
+                id: Date.now()
+            };
+            
+            users[username] = currentUser;
+            saveUserData();
+            startApp();
+            addMessage('System', `${username} joined ChatHub!`, new Date());
+        }
+
+        function startApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            
+            // Add user to main server if not already a member
+            if (!servers.main.members.includes(currentUser.username)) {
+                servers.main.members.push(currentUser.username);
+                saveUserData();
+            }
+            
+            // Update UI with user info
+            updateUserInterface();
+            updateOnlineUsers();
+            updateServersList();
+            loadCurrentServer();
+        }
+
+        function updateUserInterface() {
+            if (!currentUser) return;
+            
+            const avatar = currentUser.avatar || currentUser.username.charAt(0).toUpperCase();
+            
+            // Update header avatar
+            const headerAvatar = document.getElementById('headerAvatar');
+            if (currentUser.avatar) {
+                headerAvatar.style.backgroundImage = `url(${currentUser.avatar})`;
+                headerAvatar.textContent = '';
+            } else {
+                headerAvatar.textContent = avatar;
+                headerAvatar.style.backgroundImage = '';
+            }
+            
+            // Update sidebar avatar
+            const sidebarAvatar = document.getElementById('sidebarAvatar');
+            if (currentUser.avatar) {
+                sidebarAvatar.style.backgroundImage = `url(${currentUser.avatar})`;
+                sidebarAvatar.textContent = '';
+            } else {
+                sidebarAvatar.textContent = avatar;
+                sidebarAvatar.style.backgroundImage = '';
+            }
+            
+            document.getElementById('sidebarUsername').textContent = currentUser.username;
+        }
+
+        function logout() {
+            if (currentUser) {
+                users[currentUser.username].online = false;
+                users[currentUser.username].lastSeen = new Date();
+                saveUserData();
+                addMessage('System', `${currentUser.username} left the server`, new Date());
+            }
+            
+            currentUser = null;
+            isOwner = false;
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('app').style.display = 'none';
+            
+            // Reset form
+            document.getElementById('authForm').reset();
+            updateOnlineUsers();
+        }
+
+        // Owner console command
+        window.owner_login = function(username, password) {
+            if (username === 'yuta.1' && password === 'Tenino441') {
+                console.log('Owner access granted! 👑');
+                
+                // Create owner account if doesn't exist
+                if (!users['Owner']) {
+                    users['Owner'] = {
+                        username: 'Owner',
+                        email: 'owner@chathub.com',
+                        password: 'Tenino441',
+                        bio: 'Platform Administrator',
+                        avatar: null,
+                        banner: null,
+                        badges: ['owner'],
+                        online: true,
+                        lastSeen: new Date(),
+                        joinDate: new Date(2024, 0, 1),
+                        id: 1
+                    };
+                }
+                
+                currentUser = users['Owner'];
+                currentUser.online = true;
+                isOwner = true;
+                saveUserData();
+                
+                if (document.getElementById('app').style.display === 'none') {
+                    startApp();
+                }
+                
+                return 'Owner privileges activated! 👑';
+            }
+            return 'Access denied';
+        };
+
+        // Chat functions
+        function addMessage(author, text, timestamp, avatar = null) {
+            const message = { 
+                author, 
+                text, 
+                timestamp: timestamp || new Date(),
+                avatar: avatar || (users[author] ? users[author].avatar : null)
+            };
+            messages.push(message);
+            
+            // Keep only last 100 messages to prevent memory issues
+            if (messages.length > 100) {
+                messages = messages.slice(-100);
+            }
+            
+            saveUserData();
+            displayMessage(author, text, timestamp, avatar);
+        }
+
+        function displayMessage(author, text, timestamp, avatar = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageEl = document.createElement('div');
+            messageEl.className = 'message';
+            
+            const avatarDisplay = avatar || author.charAt(0).toUpperCase();
+            const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageEl.innerHTML = `
+                <div class="message-avatar" ${avatar ? `style="background-image: url(${avatar}); background-size: cover;"` : ''}>${avatar ? '' : avatarDisplay}</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">${author}</span>
+                        <span class="message-timestamp">Today at ${time}</span>
+                    </div>
+                    <div class="message-text">${text}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageEl);
+            
+            if (settings.autoScrollChat) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        function handleMessageInput(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (!text || !currentUser) return;
+            
+            addMessage(currentUser.username, text, new Date(), currentUser.avatar);
+            input.value = '';
+            
+            // Play notification sound
+            if (settings.soundNotifications) {
+                playNotificationSound();
+            }
+        }
+
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (e) {
+                console.log('Audio notification not available');
+            }
+        }
+
+        // User management
+        function updateOnlineUsers() {
+            const onlineUsersList = document.getElementById('onlineUsersList');
+            const onlineCount = document.getElementById('onlineCount');
+            
+            const onlineUsers = Object.values(users).filter(user => user.online);
+            onlineCount.textContent = onlineUsers.length;
+            
+            onlineUsersList.innerHTML = '';
+            
+            onlineUsers.forEach(user => {
+                const userEl = document.createElement('div');
+                userEl.className = 'online-user';
+                userEl.onclick = () => openUserProfile(user);
+                
+                const avatar = user.avatar || user.username.charAt(0).toUpperCase();
+                
+                userEl.innerHTML = `
+                    <div class="online-user-avatar" ${user.avatar ? `style="background-image: url(${user.avatar}); background-size: cover;"` : ''}>
+                        ${user.avatar ? '' : avatar}
+                        <div class="status-indicator"></div>
+                    </div>
+                    <div class="online-user-name">${user.username}</div>
+                `;
+                
+                onlineUsersList.appendChild(userEl);
+            });
+        }
+
+        // Profile functions
+        function openProfile() {
+            if (!currentUser) return;
+            openUserProfile(currentUser);
+        }
+
+        function openUserProfile(user) {
+            selectedUser = user;
+            
+            const modal = document.getElementById('profileModal');
+            const avatar = user.avatar || user.username.charAt(0).toUpperCase();
+            
+            // Update profile display
+            const profileAvatar = document.getElementById('profileAvatar');
+            if (user.avatar) {
+                profileAvatar.style.backgroundImage = `url(${user.avatar})`;
+                profileAvatar.textContent = '';
+            } else {
+                profileAvatar.textContent = avatar;
+                profileAvatar.style.backgroundImage = '';
+            }
+            
+            // Update banner
+            const profileBanner = document.getElementById('profileBanner');
+            if (user.banner) {
+                profileBanner.style.backgroundImage = `url(${user.banner})`;
+            } else {
+                profileBanner.style.backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }
+            
+            document.getElementById('profileUsername').textContent = user.username;
+            document.getElementById('profileStatus').textContent = user.online ? 'Online' : `Last seen ${user.lastSeen ? new Date(user.lastSeen).toLocaleString() : 'Unknown'}`;
+            
+            // Update form fields only if viewing own profile
+            if (user.username === currentUser?.username) {
+                document.getElementById('editUsername').value = user.username;
+                document.getElementById('editEmail').value = user.email || '';
+                document.getElementById('editBio').value = user.bio || '';
+            } else {
+                // Clear form for other users
+                document.getElementById('editUsername').value = '';
+                document.getElementById('editEmail').value = '';
+                document.getElementById('editBio').value = user.bio || '';
+                document.getElementById('editBio').disabled = true;
+                document.getElementById('editUsername').disabled = true;
+                document.getElementById('editEmail').disabled = true;
+            }
+            
+            // Show badges
+            const badgesContainer = document.getElementById('profileBadges');
+            badgesContainer.innerHTML = '';
+            
+            if (user.badges && user.badges.length > 0) {
+                user.badges.forEach(badge => {
+                    const badgeEl = document.createElement('div');
+                    badgeEl.className = `badge ${badge}`;
+                    badgeEl.textContent = getBadgeName(badge);
+                    badgesContainer.appendChild(badgeEl);
+                });
+            }
+            
+            // Show admin panel for owner
+            const adminPanel = document.getElementById('adminPanel');
+            if (isOwner && user.username !== 'Owner') {
+                adminPanel.style.display = 'block';
+            } else {
+                adminPanel.style.display = 'none';
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function getBadgeName(badge) {
+            const badgeNames = {
+                'vip': 'VIP',
+                'first500': 'First 500',
+                'beta': 'Beta Tester',
+                'contributor': 'Contributor',
+                'supporter': 'Supporter',
+                'verified': 'Verified',
+                'owner': 'Owner'
+            };
+            return badgeNames[badge] || badge;
+        }
+
+        function updateProfile() {
+            if (!currentUser || selectedUser.username !== currentUser.username) return;
+            
+            const newUsername = document.getElementById('editUsername').value.trim();
+            const newEmail = document.getElementById('editEmail').value.trim();
+            const newBio = document.getElementById('editBio').value.trim();
+            
+            if (!newUsername) {
+                alert('Username cannot be empty');
+                return;
+            }
+            
+            // Check if username is taken (except by current user)
+            if (newUsername !== currentUser.username && users[newUsername]) {
+                alert('Username already taken');
+                return;
+            }
+            
+            // Update user data
+            if (newUsername !== currentUser.username) {
+                delete users[currentUser.username];
+                currentUser.username = newUsername;
+            }
+            
+            currentUser.email = newEmail;
+            currentUser.bio = newBio;
+            users[currentUser.username] = currentUser;
+            saveUserData();
+            
+            // Update UI
+            updateUserInterface();
+            updateOnlineUsers();
+            
+            // Update profile modal
+            document.getElementById('profileUsername').textContent = currentUser.username;
+            
+            alert('Profile updated successfully!');
+        }
+
+        // Image upload functions
+        function changeAvatar() {
+            if (!currentUser || selectedUser.username !== currentUser.username) return;
+            document.getElementById('avatarInput').click();
+        }
+
+        function changeBanner() {
+            if (!currentUser || selectedUser.username !== currentUser.username) return;
+            document.getElementById('bannerInput').click();
+        }
+
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                alert('Image too large. Please choose an image under 5MB.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentUser.avatar = e.target.result;
+                users[currentUser.username] = currentUser;
+                saveUserData();
+                updateUserInterface();
+                
+                // Update profile modal if open
+                const profileAvatar = document.getElementById('profileAvatar');
+                profileAvatar.style.backgroundImage = `url(${currentUser.avatar})`;
+                profileAvatar.textContent = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleBannerUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 8 * 1024 * 1024) { // 8MB limit
+                alert('Image too large. Please choose an image under 8MB.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentUser.banner = e.target.result;
+                users[currentUser.username] = currentUser;
+                saveUserData();
+                
+                // Update profile modal if open
+                const profileBanner = document.getElementById('profileBanner');
+                profileBanner.style.backgroundImage = `url(${currentUser.banner})`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Admin functions
+        function viewAllData() {
+            if (!isOwner) return;
+            
+            console.group('🛡️ OWNER DATA ACCESS');
+            console.log('📊 All Users:', users);
+            console.log('💬 All Messages:', messages);
+            console.log('⚙️ Settings:', settings);
+            console.log('👑 Current User:', currentUser);
+            console.log('🌐 Online Users:', Object.values(users).filter(u => u.online));
+            console.log('📈 Total Registered Users:', Object.keys(users).length);
+            console.log('🎯 User Registration Count:', userCount);
+            console.groupEnd();
+            
+            alert('All data logged to console (F12)');
+        }
+
+        function clearMessages() {
+            if (!isOwner) return;
+            
+            if (confirm('Are you sure you want to clear all messages?')) {
+                messages = [];
+                saveUserData();
+                document.getElementById('chatMessages').innerHTML = `
+                    <div class="message">
+                        <div class="message-avatar">S</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">System</span>
+                                <span class="message-timestamp">Today at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                            <div class="message-text">Chat has been cleared by an administrator.</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function kickUser() {
+            if (!isOwner || !selectedUser || selectedUser.username === currentUser.username || selectedUser.username === 'Owner') return;
+            
+            if (confirm(`Kick ${selectedUser.username} from the server?`)) {
+                users[selectedUser.username].online = false;
+                users[selectedUser.username].lastSeen = new Date();
+                saveUserData();
+                updateOnlineUsers();
+                addMessage('System', `${selectedUser.username} was kicked from the server`, new Date());
+                closeModal('profileModal');
+            }
+        }
+
+        function addBadge(badgeType) {
+            if (!isOwner || !selectedUser) return;
+            
+            if (!selectedUser.badges) {
+                selectedUser.badges = [];
+            }
+            
+            if (!selectedUser.badges.includes(badgeType)) {
+                selectedUser.badges.push(badgeType);
+                users[selectedUser.username] = selectedUser;
+                saveUserData();
+                
+                // Refresh the profile display
+                openUserProfile(selectedUser);
+                
+                console.log(`Added ${badgeType} badge to ${selectedUser.username}`);
+            }
+        }
+
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            selectedUser = null;
+            
+            // Re-enable form fields
+            document.getElementById('editBio').disabled = false;
+            document.getElementById('editUsername').disabled = false;
+            document.getElementById('editEmail').disabled = false;
+        }
+
+        function openSettings() {
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        // Settings functions
+        function toggleSetting(toggle) {
+            toggle.classList.toggle('active');
+            
+            // Update settings based on toggle position
+            const settingItems = document.querySelectorAll('.setting-item');
+            settingItems.forEach((item, index) => {
+                const toggleEl = item.querySelector('.toggle-switch');
+                const isActive = toggleEl.classList.contains('active');
+                
+                switch(index) {
+                    case 0: settings.darkTheme = isActive; break;
+                    case 1: settings.soundNotifications = isActive; break;
+                    case 2: settings.showOnlineStatus = isActive; break;
+                    case 3: settings.autoScrollChat = isActive; break;
+                }
+            });
+            
+            localStorage.setItem('chathub_settings', JSON.stringify(settings));
+        }
+
+        // Channel functions
+        function switchChannel(channelName) {
+            // Remove active class from all channels
+            document.querySelectorAll('.channel').forEach(ch => ch.classList.remove('active'));
+            
+            // Add active class to clicked channel
+            event.target.closest('.channel').classList.add('active');
+            
+            // Update chat header
+            document.querySelector('.chat-header span:last-child').textContent = channelName;
+        }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                selectedUser = null;
+                
+                // Re-enable form fields
+                document.getElementById('editBio').disabled = false;
+                document.getElementById('editUsername').disabled = false;
+                document.getElementById('editEmail').disabled = false;
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Ctrl/Cmd + K to focus message input
+            if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+                event.preventDefault();
+                document.getElementById('messageInput').focus();
+            }
+            
+            // Escape to close modals
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    if (modal.style.display === 'flex') {
+                        modal.style.display = 'none';
+                    }
+                });
+                selectedUser = null;
+                
+                // Re-enable form fields
+                document.getElementById('editBio').disabled = false;
+                document.getElementById('editUsername').disabled = false;
+                document.getElementById('editEmail').disabled = false;
+            }
+        });
+
+        // Auto-save user activity
+        setInterval(() => {
+            if (currentUser) {
+                users[currentUser.username].lastSeen = new Date();
+                saveUserData();
+            }
+        }, 60000); // Every minute
+
+        // Console commands for testing
+        window.createTestAccount = function(username, email = `${username}@test.com`) {
+            if (!users[username]) {
+                userCount++;
+                users[username] = {
+                    username,
+                    email,
+                    password: 'test123',
+                    bio: `I'm ${username}, a test user!`,
+                    avatar: null,
+                    banner: null,
+                    badges: Math.random() > 0.7 ? ['beta'] : [],
+                    online: Math.random() > 0.5,
+                    lastSeen: new Date(),
+                    joinDate: new Date(),
+                    id: Date.now() + Math.random()
+                };
+                saveUserData();
+                updateOnlineUsers();
+                return `Created test account: ${username}`;
+            }
+            return 'User already exists';
+        };
+
+        window.simulateMessage = function(username, message) {
+            if (users[username]) {
+                addMessage(username, message, new Date(), users[username].avatar);
+                return `Message sent from ${username}`;
+            }
+            return 'User not found';
+        };
+
+        // Load settings
+        const savedSettings = localStorage.getItem('chathub_settings');
+        if (savedSettings) {
+            settings = { ...settings, ...JSON.parse(savedSettings) };
+        }
+
+        // Console welcome message
+        console.log(`
+Hi
+        `);
+    </script>
+</body>
+</html>
